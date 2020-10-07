@@ -19,10 +19,9 @@ def init(String ueDir, String platform = '', String configuration = '') {
     }
 }
 
-def build(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
+def build(String projectDir, String projectName, String logFile = '', String platform = '', String configuration = '') {
     assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
-    assert(outputDirectory);
 
     if(!platform) {
         platform = UnrealConfiguration.targetPlatform;
