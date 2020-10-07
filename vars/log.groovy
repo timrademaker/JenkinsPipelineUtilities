@@ -1,12 +1,16 @@
-def info(message) {
+def call(String message) {
+    echo "${message}";
+}
+
+def info(String message) {
     echo "INFO: ${message}"
 }
 
-def warn(message) {
+def warn(String message) {
     echo "WARNING: ${message}"
 }
 
-def error(message) {
+def error(String message) {
     echo "ERROR: ${message}"
 }
 
