@@ -1,4 +1,4 @@
-class ItchConfig {
+class ItchConfiguration {
     String butlerExe = '';
     String user = '';
     String game = '';
@@ -7,23 +7,18 @@ class ItchConfig {
     List<String> ignoredFiles = [];
 }
 
-def config = new ItchConfig();
+def itchConfig = new ItchConfiguration();
 
-def init(String butlerExecutable, String apiKeyID = '', String username = '', String gameName = '', String channel = '', List<String> ignoredFiles = []) {
+def init(String butlerExecutable, String apiKeyID = '', String username = '') {
     assert(file.exists(butlerExecutable));
 
-    config.butlerExe = butlerExecutable;
-    config.apiKeyID = apiKeyID;
-    config.user = username;
-    config.game = gameName;
-    config.channel = channel;
-    config.ignoredFiles = ignoredFiles;
+    itchConfig.butlerExe = butlerExecutable;
+    itchConfig.apiKeyID = apiKeyID;
+    itchConfig.user = username;
 }
 
-def push(String gameDirectory, String apiKeyID = config.apiKeyID, String username = config.user, String gameName = config.game, String channel = config.channel, Boolean dryRun = false, List<String> ignoredFiles = config.ignoredFiles) {
+def push(String gameDirectory, String gameName, String channel, Boolean dryRun = false, List<String> ignoredFiles = []) {
     assert(file.dirExists(gameDirectory));
-    assert(apiKeyID);
-    assert(username);
     assert(gameName);
     assert(channel);
 
@@ -37,9 +32,9 @@ def push(String gameDirectory, String apiKeyID = config.apiKeyID, String usernam
         dryRunStr = '--dry-run';
     }
 
-    withCredentials([string(credentialsId: apiKeyID, variable: 'BUTLER_API_KEY')]) {
+    withCredentials([string(credentialsId: itchConfig.apiKeyID, variable: 'BUTLER_API_KEY')]) {
         bat label: 'Upload build to itch.io', script: """${config.butlerExe} login
-                        ${config.butlerExe} push --if-changed --assume-yes ${ignoreStr} ${dryRunStr} '${gameDirectory}' '${username}/${gameName}:${channel}'
-                        ${config.butlerExe} logout --assume-yes"""
+                        ${itchConfig.butlerExe} push --if-changed --assume-yes ${ignoreStr} ${dryRunStr} '${gameDirectory}' '${itchConfig.username}/${gameName}:${channel}'
+                        ${itchConfig.butlerExe} logout --assume-yes"""
     }
 }

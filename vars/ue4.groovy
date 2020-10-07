@@ -1,50 +1,67 @@
-class ueConfig {
+class ueConfiguration {
     String engineRootDirectory = '';
-    String projectDirectory = '';
-    String projectName = '';
     String targetPlatform = 'Win64';
     String buildConfiguration = 'Development';
-
-    String logFile = '';
-    String buildOutDirectory = '';
 }
 
-def config = new ueConfig();
+def ueConfig = new ueConfiguration();
 
 
-def init(String ueDir, String projectDir = config.projectDirectory, String projectName = config.projectName, String outputDirectory = config.buildOutDirectory, String platform = config.targetPlatform, String configuration = config.buildConfiguration, String logFile = config.logFile) {
+def init(String ueDir, String platform = '', String configuration = '') {
     assert(file.dirExists(ueDir));
 
-    config.ueRootDirectory = ueDir;
-    config.projectDirectory = projectDir;
-    config.targetPlatform = platform;
-    config.buildConfiguration = configuration;
-    
-    config.logFile = logFile;
-    config.buildOutDirectory = outputDirectory;
+    ueConfig.ueRootDirectory = ueDir;
+
+    if(platform) {
+        ueConfig.targetPlatform = platform;
+    }
+
+    if(configuration) {
+        ueConfig.buildConfiguration = configuration;
+    }
 }
 
-def build(String projectDir = config.projectDirectory, String projectName = config.projectName, String outputDirectory = config.buildOutDirectory, String platform = config.targetPlatform, String configuration = config.buildConfiguration, String logFile = config.logFile) {
+def build(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
     assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
-    assert(platform);
-    assert(configuration);
-    
-    bat label: 'Generate Project Files', script: "CALL \"${config.engineRootDirectory}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe\" -projectfiles -project=\"${projectDir}\\${projectName}.uproject\" -game -rocket -progress -nointellisense -WaitMutex -Platforms=\"${platform}\" -log=\"${logFile}\" PrecompileForTargets = PrecompileTargetsType.Any;"
 
-    if(config.buildConfiguration == 'Development') {
-        bat label: 'Build binaries', script: "CALL \"${config.engineRootDirectory}\\Engine\\Build\\BatchFiles\\Build.bat\" \"${projectName}Editor\" \"${projectDir}\\${projectName}.uproject\" ${platform} ${configuration} -log=\"${logFile}\""
+    if(!platform) {
+        platform = ueConfig.targetPlatform;
+    }
+
+    if(!configuration) {
+        configuration = ueConfig.configuration;
+    }
+
+    if(!logFile) {
+        logFile = 'build.log';
+    }
+    
+    bat label: 'Generate Project Files', script: "CALL \"${ueConfig.engineRootDirectory}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe\" -projectfiles -project=\"${projectDir}\\${projectName}.uproject\" -game -rocket -progress -nointellisense -WaitMutex -Platforms=\"${platform}\" -log=\"${logFile}\" PrecompileForTargets = PrecompileTargetsType.Any;"
+
+    if(configuration == 'Development') {
+        bat label: 'Build binaries', script: "CALL \"${ueConfig.engineRootDirectory}\\Engine\\Build\\BatchFiles\\Build.bat\" \"${projectName}Editor\" \"${projectDir}\\${projectName}.uproject\" ${platform} ${configuration} -log=\"${logFile}\""
     }
 
 }
 
-def packageBuild(String projectDir = config.projectDirectory, String projectName = config.projectName, String outputDirectory = config.buildOutDirectory, String platform = config.targetPlatform, String configuration = config.buildConfiguration, String logFile = config.logFile) {
+def packageBuild(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
     assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
-    assert(platform);
-    assert(configuration);
+    
+    if(!platform) {
+        platform = ueConfig.targetPlatform;
+    }
 
-    bat label: 'Package project', script: "CALL \"${config.engineRootDirectory}\\Engine\\Build\\BatchFiles\\RunUAT.bat\" BuildCookRun -project=\"${projectDir}\\${projectName}.uproject\" -noP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -archivedirectory=\"${outputDirectory}\" -log=\"${logFile}\""
+    if(!configuration) {
+        configuration = ueConfig.configuration;
+    }
+
+    if(!logFile) {
+        logFile = 'package.log';
+    }
+
+    bat label: 'Package project', script: "CALL \"${ueConfig.engineRootDirectory}\\Engine\\Build\\BatchFiles\\RunUAT.bat\" BuildCookRun -project=\"${projectDir}\\${projectName}.uproject\" -noP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -archivedirectory=\"${outputDirectory}\" -log=\"${logFile}\""
 }
