@@ -9,7 +9,7 @@ def dirExists(String directory) {
 }
 
 def nameExists(String path) {
-    def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${directory}' -PathType Any");
+    def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${path}' -PathType Any");
     return ret.replaceAll("\\s", "").equals("True");
 }
 
