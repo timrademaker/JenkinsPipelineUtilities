@@ -63,30 +63,32 @@ def packageBuild(String projectDir, String projectName, String outputDirectory, 
 
 /*  Automation Testing  */
 
-def runTestsNamed(String projectDir, String projectName, List<String> testNames, String minimumPriority = 'None') {
+def runTestsNamed(String projectDir, String projectName, List<String> testNames, String minimumPriority = '') {
     def testsToRun = testNames.join('+');
     
     runTests("${projectDir}/${projectName}.uproject", ["RunTests Now ${testsToRun}"], minimumPriority);
 }
 
-def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = 'None') {
+def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = '') {
     runTests("${projectDir}/${projectName}.uproject", ["RunCheckpointedTests Now ${content}"], minimumPriority);
 }
 
-def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = 'None') {
+def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = '') {
     if(filterIsValid(filter)) {
         runTests("${projectDir}/${projectName}.uproject", ["RunFilter Now ${filter}"], minimumPriority);
     }
 }
 
-def runAllTests(String projectDir, String projectName, String minimumPriority = 'None') {
+def runAllTests(String projectDir, String projectName, String minimumPriority = '') {
     runTests("${projectDir}/${projectName}.uproject", ["RunAll Now"], minimumPriority);
 }
 
 private def runTests(String project, List<String> automationCommands, String minimumPriority) {
     assert(file.exists(project));
 
-    automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
+    if(minimumPriority) {
+        automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
+    }
 
     def command = '';
     for(cmd in automationCommands) {
