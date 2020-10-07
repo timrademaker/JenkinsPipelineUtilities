@@ -12,3 +12,6 @@ error /(?i)ERROR[ \t]*:/
 # Warnings
 warning /(?i)warning [A-Z]+[0-9]+[ \t]*:/
 warning /(?i)WARNING[ \t]*:/
+
+# Info
+info /(?i)INFO[ \t]*:/
