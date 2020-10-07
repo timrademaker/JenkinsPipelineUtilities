@@ -39,7 +39,7 @@ def build(String projectDir = config.projectDirectory, String projectName = conf
 
 }
 
-def package(String ueDir = config.engineRootDirectory, String projectDir = config.projectDirectory, String projectName = config.projectName, String outputDirectory = config.buildOutDirectory, String platform = config.targetPlatform, String configuration = config.buildConfiguration, String logFile = config.logFile) {
+def packageBuild(String projectDir = config.projectDirectory, String projectName = config.projectName, String outputDirectory = config.buildOutDirectory, String platform = config.targetPlatform, String configuration = config.buildConfiguration, String logFile = config.logFile) {
     assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);

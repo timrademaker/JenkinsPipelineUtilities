@@ -20,7 +20,7 @@ def init(String butlerExecutable, String apiKeyID = '', String username = '', St
     config.ignoredFiles = ignoredFiles;
 }
 
-def push(String gameDirectory, String apiKeyID = config.apiKeyID, String username = config.user, String gameName = config.game, String channel = config.channel, Bool dryRun = false, List<String> ignoredFiles = config.ignoredFiles) {
+def push(String gameDirectory, String apiKeyID = config.apiKeyID, String username = config.user, String gameName = config.game, String channel = config.channel, Boolean dryRun = false, List<String> ignoredFiles = config.ignoredFiles) {
     assert(file.dirExists(gameDirectory));
     assert(apiKeyID);
     assert(username);
