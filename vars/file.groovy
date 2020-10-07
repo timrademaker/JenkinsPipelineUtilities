@@ -1,5 +1,5 @@
 def exists(String filePath) {
-    def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${directory}' -PathType Leaf");
+    def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${filePath}' -PathType Leaf");
     return ret.replaceAll("\\s", "").equals("True");
 }
 
