@@ -28,7 +28,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
     }
 
     if(!configuration) {
-        configuration = UnrealConfiguration.configuration;
+        configuration = UnrealConfiguration.buildConfiguration;
     }
 
     if(!logFile) {
@@ -53,7 +53,7 @@ def packageBuild(String projectDir, String projectName, String outputDirectory, 
     }
 
     if(!configuration) {
-        configuration = UnrealConfiguration.configuration;
+        configuration = UnrealConfiguration.buildConfiguration;
     }
 
     if(!logFile) {
