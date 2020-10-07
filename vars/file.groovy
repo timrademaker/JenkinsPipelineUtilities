@@ -19,6 +19,10 @@ def create(String filePath, String content) {
     }
 }
 
+def write(String filePath, String content) {
+    writeFile(file: filePath, text: content);
+}
+
 def createDir(String directory) {
     if(!nameExists(directory)) {
         powershell(label: 'Create folder', returnStdout: false, script: "New-Item '${directory}' -ItemType 'directory'");
