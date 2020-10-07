@@ -10,6 +10,12 @@ def error(message) {
     echo "ERROR: ${message}"
 }
 
-def parse(logparserRulePath = "logparserRules.txt", showGraphs = true) {
+def parse(String logparserRulePath = '', Boolean showGraphs = true) {
+    if(!logparserRulePath) {
+        parseRules = libraryResource 'com/timrademaker/logparserRules.txt'
+        logparserRulePath = 'logparserRules.txt'
+        file.create(logparserRulePath, parseRules);
+    }
+
     logParser(projectRulePath: logparserRulePath, showGraphs: showGraphs, useProjectRule: true)
 }

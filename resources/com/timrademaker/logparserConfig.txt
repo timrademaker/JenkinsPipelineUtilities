@@ -1,0 +1,14 @@
+# Divide the report up into sections
+start /BUILD COMMAND STARTED/
+start /COOK COMMAND STARTED/
+start /STAGE COMMAND STARTED/
+start /PACKAGE COMMAND STARTED/
+start /ARCHIVE COMMAND STARTED/
+
+# Errors
+error /(?i)error [A-Z]+[0-9]+[ \t]*:/
+error /(?i)ERROR[ \t]*:/
+
+# Warnings
+warning /(?i)warning [A-Z]+[0-9]+[ \t]*:/
+warning /(?i)WARNING[ \t]*:/

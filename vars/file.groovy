@@ -14,8 +14,8 @@ def nameExists(String path) {
 }
 
 def create(String filePath, String content) {
-    if(!nameExists(directory)) {
-        powershell(label: 'Create file', returnStdout: false, script: "New-Item '${directory}' -ItemType 'file' -Value '${content}'");
+    if(!nameExists(filePath)) {
+        writeFile(file: filePath, text: content);
     }
 }
 
