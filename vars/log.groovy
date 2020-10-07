@@ -12,7 +12,7 @@ def error(message) {
 
 def parse(String logparserRulePath = '', Boolean showGraphs = true) {
     if(!logparserRulePath) {
-        parseRules = libraryResource 'com/timrademaker/logparserRules.txt'
+        parseRules = libraryResource 'com/timrademaker/logparserConfig.txt'
         logparserRulePath = 'logparserRules.txt'
         file.create(logparserRulePath, parseRules);
     }
