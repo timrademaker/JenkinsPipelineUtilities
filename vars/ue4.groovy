@@ -20,7 +20,6 @@ def init(String ueDir, String platform = '', String configuration = '') {
 }
 
 def build(String projectDir, String projectName, String logFile = '', String platform = '', String configuration = '') {
-    assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
 
     if(!platform) {
@@ -35,16 +34,15 @@ def build(String projectDir, String projectName, String logFile = '', String pla
         logFile = 'build.log';
     }
     
-    bat label: 'Generate Project Files', script: "CALL \"${UnrealConfiguration.engineRootDirectory}\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe\" -projectfiles -project=\"${projectDir}\\${projectName}.uproject\" -game -rocket -progress -nointellisense -WaitMutex -Platforms=\"${platform}\" -log=\"${logFile}\" PrecompileForTargets = PrecompileTargetsType.Any;"
+    bat label: 'Generate Project Files', script: "CALL '${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/DotNET/UnrealBuildTool.exe' -projectfiles -project='${projectDir}/${projectName}.uproject' -game -rocket -progress -nointellisense -WaitMutex -Platforms='${platform}' -log='${logFile}' PrecompileForTargets = PrecompileTargetsType.Any;"
 
     if(configuration == 'Development') {
-        bat label: 'Build binaries', script: "CALL \"${UnrealConfiguration.engineRootDirectory}\\Engine\\Build\\BatchFiles\\Build.bat\" \"${projectName}Editor\" \"${projectDir}\\${projectName}.uproject\" ${platform} ${configuration} -log=\"${logFile}\""
+        bat label: 'Build binaries', script: "CALL '${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/Build.bat' '${projectName}Editor' '${projectDir}/${projectName}.uproject' ${platform} ${configuration} -log='${logFile}'"
     }
 
 }
 
 def packageBuild(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
-    assert(file.dirExists(projectDir));
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
     
@@ -60,5 +58,78 @@ def packageBuild(String projectDir, String projectName, String outputDirectory, 
         logFile = 'package.log';
     }
 
-    bat label: 'Package project', script: "CALL \"${UnrealConfiguration.engineRootDirectory}\\Engine\\Build\\BatchFiles\\RunUAT.bat\" BuildCookRun -project=\"${projectDir}\\${projectName}.uproject\" -noP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -archivedirectory=\"${outputDirectory}\" -log=\"${logFile}\""
+    bat label: 'Package project', script: "CALL '${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/RunUAT.bat' BuildCookRun -project='${projectDir}/${projectName}.uproject' -noP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -archivedirectory='${outputDirectory}' -log='${logFile}'"
+}
+
+/*  Automation Testing  */
+
+def runTestsNamed(String projectDir, String projectName, List<String> testNames, String minimumPriority = 'None') {
+    def testsToRun = testNames.join('+');
+    
+    runTests("${projectDir}/${projectName}.uproject", ["RunTests Now ${testsToRun}"], minimumPriority);
+}
+
+def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = 'None') {
+    runTests("${projectDir}/${projectName}.uproject", ["RunCheckpointedTests Now ${content}"], minimumPriority);
+}
+
+def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = 'None') {
+    if(filterIsValid(filter)) {
+        runTests("${projectDir}/${projectName}.uproject", ["RunFilter Now ${filter}"], minimumPriority);
+    }
+}
+
+def runAllTests(String projectDir, String projectName, String minimumPriority = 'None') {
+    runTests("${projectDir}/${projectName}.uproject", ["RunAll Now"], minimumPriority);
+}
+
+private def runTests(String project, List<String> automationCommands, String minimumPriority) {
+    assert(file.exists(project));
+
+    automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
+
+    def command = '';
+    for(cmd in automationCommands) {
+        if(cmd) {
+            command += "Automation ${cmd};"
+        }
+    }
+
+    def result = bat label: 'Run automation tests', returnStatus: true, script: "CALL ${UnrealConfiguration.engineRootDirectory}/UE4editor-cmd.exe '${projectDir}/${projectName}.uproject' -stdout -fullstdlogoutput -buildmachine -unattended -NoPause -NoSplash -NoSound -ExecCmds='${command};Quit'"
+    
+    if(result != 0) {
+        unstable 'Some tests did not pass!'
+    }
+}
+
+private def priorityLevelIsValid(String priorityLevel) {
+    def possiblePriorityLevels = ['None', 'Low', 'Medium', 'High', 'Critical'];
+    priorityLevel = priorityLevel.toLowerCase().capitalize();
+
+    if(priorityLevel in possiblePriorityLevels) {
+        return true;
+    } else {
+        log.error("Invalid test priority level '${priorityLevel}' specified. Valid levels: ${possiblePriorityLevels.join(', ')}.")
+        return false;
+    }
+}
+
+private def filterIsValid(String filter) {
+    def possibleFilters = ['Engine', 'Smoke', 'Stress', 'Perf', 'Product'];
+    filter = filter.toLowerCase().capitalize();
+
+    if(filter in possibleFilters) {
+        return true;
+    } else {
+        log.error("Invalid test filter '${filter}' specified. Valid filters: ${possibleFilters.join(', ')}.")
+        return false;
+    }
+}
+
+private def minimumTestPriorityCommand(String priorityLevel) {
+    if(priorityLevelIsValid(priorityLevel)) {
+        return "SetMinimumPriority ${priorityLevel}";
+    } else {
+        return '';
+    }
 }
