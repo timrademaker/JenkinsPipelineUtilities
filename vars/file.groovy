@@ -30,5 +30,7 @@ def createDir(String directory) {
 }
 
 def delete(String path) {
-    powershell(label: 'Delete item', returnStdout: false, script: "Remove-Item '${path}'");
+    if(nameExists(path)) {
+        powershell(label: 'Delete item', returnStdout: false, script: "Remove-Item '${path}' -Recurse -Confirm:\$false");
+    }
 }
