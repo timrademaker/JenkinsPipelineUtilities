@@ -28,3 +28,7 @@ def createDir(String directory) {
         powershell(label: 'Create folder', returnStdout: false, script: "New-Item '${directory}' -ItemType 'directory'");
     }
 }
+
+def delete(String path) {
+    powershell(label: 'Delete item', returnStdout: false, script: "Remove-Item '${path}'");
+}
