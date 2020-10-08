@@ -1,9 +1,11 @@
 import groovy.json.JsonOutput
 
+/*
 class DiscordField {
     String name;
     String value;
 }
+*/
 
 /*
 class DiscordColor {
@@ -13,7 +15,7 @@ class DiscordColor {
 }
 */
 
-def sendMessage(String webhookUrl, String title, String description, String color, String url = '', List<DiscordField> fields = []) {
+def sendMessage(String webhookUrl, String title, String description, String color, String url = '', List<String[]> fields = []) {
     def embed = [title: title, description: description, color: color.toInteger()]
 
     if(url) {
@@ -23,7 +25,7 @@ def sendMessage(String webhookUrl, String title, String description, String colo
     def embFields = []
     def i = 0;
     for(f in fields) {
-        embFields[i] = [name: f.name, value: f.value];
+        embFields[i] = [name: f[0], value: f[1]];
         i++;
     }
 
