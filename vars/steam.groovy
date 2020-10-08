@@ -16,7 +16,7 @@ def setup(String steamcmdFolder = "${env.WORKSPACE}/steamcmd") {
     }
 }
 
-def createAppManifest(String appID, String depotID, String contentRoot, String buildDescription = '', Boolean isPreview = false, String localContentServerPath = '', String setLiveOnBranch = '', String buildOutputFolder = '') {
+def createAppManifest(String appID, String depotID, String contentRoot, String buildDescription = '', Boolean isPreview = false, String localContentServerPath = '', String setLiveOnBranch = '', String buildOutputFolder = 'out/Steam') {
     def appManifest = libraryResource 'com/timrademaker/app_build_template.vdf'
     appManifest = appManifest.replace('<APP_ID>', appID);
     appManifest = appManifest.replace('<DEPOT_ID>', depotID);
