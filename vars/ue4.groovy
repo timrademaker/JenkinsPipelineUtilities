@@ -69,24 +69,24 @@ def packageBuild(String projectDir, String projectName, String outputDirectory, 
 def runTestsNamed(String projectDir, String projectName, List<String> testNames, String minimumPriority = '') {
     def testsToRun = testNames.join('+');
     
-    runTests("${projectDir}/${projectName}.uproject", ["RunTests Now ${testsToRun}"], minimumPriority);
+    runUnrealAutomationTests(projectDir, projectName, ["RunTests Now ${testsToRun}"], minimumPriority);
 }
 
 def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = '') {
-    runTests("${projectDir}/${projectName}.uproject", ["RunCheckpointedTests Now ${content}"], minimumPriority);
+    runUnrealAutomationTests(projectDir, projectName, ["RunCheckpointedTests Now ${content}"], minimumPriority);
 }
 
 def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = '') {
     if(filterIsValid(filter)) {
-        runTests(projectDir, projectName, ["RunFilter Now ${filter}"], minimumPriority);
+        runUnrealAutomationTests(projectDir, projectName, ["RunFilter Now ${filter}"], minimumPriority);
     }
 }
 
 def runAllTests(String projectDir, String projectName, String minimumPriority = '') {
-    runTests(projectDir, projectName, ["RunAll Now"], minimumPriority);
+    runUnrealAutomationTests(projectDir, projectName, ["RunAll Now"], minimumPriority);
 }
 
-private def runTests(String projectDir, String projectName, List<String> automationCommands, String minimumPriority) {
+private def runUnrealAutomationTests(String projectDir, String projectName, List<String> automationCommands, String minimumPriority) {
     def project = "${projectDir}/${projectName}.uproject";
     assert(file.exists(project));
 
@@ -100,11 +100,13 @@ private def runTests(String projectDir, String projectName, List<String> automat
             command += "Automation ${cmd};"
         }
     }
+    // Remove trailing semicolon
+    command = "${command.substring(0, command.length() - 1)}";
 
     // Ensure the game has been built before trying to run tests
     build(projectDir, projectName, configuration: 'Development');
 
-    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/UE4editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
+    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
     
     if(result != 0) {
         unstable 'Some tests did not pass!'
