@@ -113,8 +113,9 @@ private def runTests(String projectDir, String projectName, List<String> automat
 
 private def priorityLevelIsValid(String priorityLevel) {
     def possiblePriorityLevels = ['None', 'Low', 'Medium', 'High', 'Critical'];
+    priorityLevel = priorityLevel.toLowerCase().capitalize();
 
-    if(possiblePriorityLevels*.toLowerCase().contains(priorityLevel.toLowerCase())) {
+    if(priorityLevel in possiblePriorityLevels) {
         return true;
     } else {
         log.error("Invalid test priority level '${priorityLevel}' specified. Valid levels: ${possiblePriorityLevels.join(', ')}.")
@@ -124,8 +125,9 @@ private def priorityLevelIsValid(String priorityLevel) {
 
 private def filterIsValid(String filter) {
     def possibleFilters = ['Engine', 'Smoke', 'Stress', 'Perf', 'Product'];
+    filter = filter.toLowerCase().capitalize();
 
-    if(possibleFilters*.toLowerCase().contains(filter.toLowerCase())) {
+    if(filter in possibleFilters) {
         return true;
     } else {
         log.error("Invalid test filter '${filter}' specified. Valid filters: ${possibleFilters.join(', ')}.")

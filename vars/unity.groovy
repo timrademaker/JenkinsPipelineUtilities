@@ -9,33 +9,40 @@ def init(String unityDir) {
     UnityConfiguration.engineRootDirectory = unityDir;
 }
 
-def execute(String projectDir, String executeMethod, String logFile = '', Boolean noGraphics = false, String additionalParameters = '') {
+def execute(String projectDir, String methodToExecute, String buildTarget = '' String logFile = '', Boolean noGraphics = false, String additionalParameters = '') {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
-    assert(file.dirExists(projectDir));
+    assert(file.dirExists(projectDir) && projectDir != '');
+    projectDir = projectDir.replace('\\', '/');
 
     if(!logFile) {
         logFile = "${env.WORKSPACE}/logs/UnityLog-${env.BUILD_NUMBER}.txt";
     }
 
-    def exitCode = bat label: 'Execute Unity Method', returnStatus: true, script: "CALL \"${UnityConfiguration.engineRootDirectory}/Editor/Unity.exe\" -batchmode ${noGraphics ? '-nographics' : ''} -executeMethod ${executeMethod} ${additionalParameters} -logFile \"${logFile}\" -quit"
+    def buildTargetStr = '';
+    if(buildTarget) {
+        buildTargetStr = "-buildTarget ${buildTarget}";
+    }
+
+    def exitCode = bat label: 'Execute Unity Method', returnStatus: true, script: "CALL \"${UnityConfiguration.engineRootDirectory}/Editor/Unity.exe\" -batchmode -project \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -executeMethod ${methodToExecute} ${additionalParameters} -logFile \"${logFile}\" -quit"
 
     if(exitCode != 0) {
-        log.error("Unity method exited with a non-zero error code!");
+        log.error("Unity method exited with a non-zero exit code!");
         failStage();
     }
 }
 
 def runTests(String projectDir, String testPlatform = '', List<String> testFilters = [], List<String> testCategories = [], String testSettingsFile = '', String testResultFile = '', Boolean noGraphics = false) {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
-    assert(file.dirExists(projectDir));
+    assert(file.dirExists(projectDir) && projectDir != '');
+    projectDir = projectDir.replace('\\', '/');
 
-    def argumentString = "-batchmode ${noGraphics ? '-nographics' : ''} -runTest";
+    def argumentString = "-batchmode -quit -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests";
 
     if(testPlatformIsValid(testPlatform)) {
         argumentString += " -testPlatform ${testPlatform}"
     }
 
-    if(testFilter.size() > 0) {
+    if(testFilters.size() > 0) {
         argumentString += ' -testFilter ';
         for(filter in testFilters) {
             argumentString += "${filter};";
@@ -67,17 +74,38 @@ def runTests(String projectDir, String testPlatform = '', List<String> testFilte
     }
 }
 
+private def buildTargetIsValid(String target) {
+    if(!target) {
+        return false;
+    }
+
+    def possibleTargets = ['Standalone', 'Win', 'Win64', 'OSXUniversal', 'Linux64', 'iOS', 'Android', 'WebGL', 'XboxOne', 'PS4', 'WindowsStoreApps', 'Switch', 'tvOS'];
+    target = target.toLowerCase();
+
+    for(possibleTarget in possibleTargets) {
+        if(target == possibleTarget.toLowerCase()) {
+            return true;
+        }
+    }
+
+    log.error("Invalid build target '${target}' specified. Valid targets: ${possibleTargets.join(', ')}.")
+    return false;
+}
+
 private def testPlatformIsValid(String platform) {
     if(!platform) {
         return false;
     }
 
     def possiblePlatforms = ['EditMode', 'PlayMode', 'StandaloneWindows', 'StandaloneWindows64', 'StandaloneLinux64', 'StandaloneOSX', 'iOS', 'Android', 'PS4', 'XboxOne'];
+    platform = platform.toLowerCase();
 
-    if(possiblePlatforms*.toLowerCase().contains(platform.toLowerCase())) {
-        return true;
-    } else {
-        log.error("Invalid test platform '${platform}' specified. Valid platforms: ${possiblePlatforms.join(', ')}.")
-        return false;
+    for(possiblePlat in possiblePlatforms) {
+        if(platform == possiblePlat.toLowerCase()) {
+            return true;
+        }
     }
+
+    log.error("Invalid test platform '${platform}' specified. Valid platforms: ${possiblePlatforms.join(', ')}.")
+    return false;
 }
