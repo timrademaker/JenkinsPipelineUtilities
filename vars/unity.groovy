@@ -9,7 +9,7 @@ def init(String unityDir) {
     UnityConfiguration.engineRootDirectory = unityDir;
 }
 
-def execute(String projectDir, String methodToExecute, String buildTarget = '' String logFile = '', Boolean noGraphics = false, String additionalParameters = '') {
+def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = false, String additionalParameters = '') {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
     assert(file.dirExists(projectDir) && projectDir != '');
     projectDir = projectDir.replace('\\', '/');
@@ -36,7 +36,7 @@ def runTests(String projectDir, String testPlatform = '', List<String> testFilte
     assert(file.dirExists(projectDir) && projectDir != '');
     projectDir = projectDir.replace('\\', '/');
 
-    def argumentString = "-batchmode -quit -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests";
+    def argumentString = "-batchmode -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests";
 
     if(testPlatformIsValid(testPlatform)) {
         argumentString += " -testPlatform ${testPlatform}"
