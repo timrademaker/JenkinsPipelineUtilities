@@ -34,5 +34,17 @@ def sendMessage(String webhookUrl, String title, String description, String colo
     }
 
     def msg = JsonOutput.toJson([embeds: [embed]]).replace('"','""');
-    bat label: 'Discord webhook', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+    bat label: 'Discord webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+}
+
+def sendFiles(String webhookUrl, List<String> files, String message = '') {
+    def fileStr = '';
+    for(i = 0; i < files.size(); ++i) {
+        if(file.exists(files[i])) {
+            fileStr += " -F \"file${i}=@${files[i]}\"";
+        }
+    }
+    
+    def msg = "payload_json={\"\"content\"\": \"\"${message}\"\"}";
+    bat label: 'Discord webhook - Files', script: "curl -H \"Content-Type: multipart/form-data\" ${fileStr} -d \"${msg}\" ${webhookUrl}"
 }
