@@ -35,13 +35,13 @@ def build(String projectDir, String projectName, String logFile = '', String pla
     }
 
     if(!logFile) {
-        logFile = 'build.log';
+        logFile = "${env.WORKSPACE}/logs/UnrealBuildLog-${env.BUILD_NUMBER}.log";
     }
     
     bat label: 'Generate Project Files', script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/DotNET/UnrealBuildTool.exe\" -projectfiles -project=\"${projectDir}/${projectName}.uproject\" -Game -Rocket -Progress -NoIntellisense -WaitMutex -Platforms=\"${platform}\" -Log=\"${logFile}\" PrecompileForTargets = PrecompileTargetsType.Any;"
 
     if(configuration == 'Development') {
-        bat label: 'Build binaries', script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/Build.bat\" \"${projectName}Editor\" \"${projectDir}/${projectName}.uproject\" ${platform} ${configuration} -Log=\"${logFile}\""
+        bat label: 'Build Binaries', script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/Build.bat\" \"${projectName}Editor\" \"${projectDir}/${projectName}.uproject\" ${platform} ${configuration} -Log=\"${logFile}\""
     }
 }
 
@@ -58,10 +58,10 @@ def packageBuild(String projectDir, String projectName, String outputDirectory, 
     }
 
     if(!logFile) {
-        logFile = 'package.log';
+        logFile = "${env.WORKSPACE}/logs/UnrealPackageLog-${env.BUILD_NUMBER}.log";
     }
 
-    bat label: 'Package project', script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/RunUAT.bat\" BuildCookRun -Project=\"${projectDir}/${projectName}.uproject\" -NoP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -ArchiveDirectory=\"${outputDirectory}\" -Log=\"${logFile}\""
+    bat label: 'Package Project', script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Build/BatchFiles/RunUAT.bat\" BuildCookRun -Project=\"${projectDir}/${projectName}.uproject\" -NoP4 -Distribution -Cook -Build -Stage -Pak -Rocket -Prereqs -Package -TargetPlatform=${platform} -Platform=${platform} -ClientConfig=${configuration} -ServerConfig=${configuration} -Archive -ArchiveDirectory=\"${outputDirectory}\" -Log=\"${logFile}\""
 }
 
 /*  Automation Testing  */
@@ -104,7 +104,7 @@ private def runTests(String projectDir, String projectName, List<String> automat
     // Ensure the game has been built before trying to run tests
     build(projectDir, projectName, configuration: 'Development');
 
-    def result = bat label: 'Run automation tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/UE4editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
+    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/UE4editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
     
     if(result != 0) {
         unstable 'Some tests did not pass!'
@@ -113,9 +113,8 @@ private def runTests(String projectDir, String projectName, List<String> automat
 
 private def priorityLevelIsValid(String priorityLevel) {
     def possiblePriorityLevels = ['None', 'Low', 'Medium', 'High', 'Critical'];
-    priorityLevel = priorityLevel.toLowerCase().capitalize();
 
-    if(priorityLevel in possiblePriorityLevels) {
+    if(possiblePriorityLevels*.toLowerCase().contains(priorityLevel.toLowerCase())) {
         return true;
     } else {
         log.error("Invalid test priority level '${priorityLevel}' specified. Valid levels: ${possiblePriorityLevels.join(', ')}.")
@@ -125,9 +124,8 @@ private def priorityLevelIsValid(String priorityLevel) {
 
 private def filterIsValid(String filter) {
     def possibleFilters = ['Engine', 'Smoke', 'Stress', 'Perf', 'Product'];
-    filter = filter.toLowerCase().capitalize();
 
-    if(filter in possibleFilters) {
+    if(possibleFilters*.toLowerCase().contains(filter.toLowerCase())) {
         return true;
     } else {
         log.error("Invalid test filter '${filter}' specified. Valid filters: ${possibleFilters.join(', ')}.")
