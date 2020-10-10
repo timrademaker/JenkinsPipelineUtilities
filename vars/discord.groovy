@@ -15,8 +15,17 @@ class DiscordColor {
 }
 */
 
-def sendMessage(String webhookUrl, String title, String description, String color, String url = '', List<String[]> fields = []) {
+def sendMessage(String webhookUrl, String message) {
+    def msg = "{\"\"content\"\": \"\"${message}\"\"}"
+    bat label: 'Discord webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+}
+
+def sendEmbed(String webhookUrl, String title, String description, String color = '0', List<String[]> fields = [], String footer = '', String url = '') {
     def embed = [title: title, description: description, color: color.toInteger()]
+
+    if(footer) {
+        embed.footer = [text: footer];
+    }
 
     if(url) {
         embed.url = url;
@@ -34,7 +43,7 @@ def sendMessage(String webhookUrl, String title, String description, String colo
     }
 
     def msg = JsonOutput.toJson([embeds: [embed]]).replace('"','""');
-    bat label: 'Discord webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+    bat label: 'Discord webhook - Embed', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
 }
 
 def sendFiles(String webhookUrl, List<String> files, String message = '') {
