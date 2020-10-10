@@ -45,6 +45,6 @@ def sendFiles(String webhookUrl, List<String> files, String message = '') {
         }
     }
     
-    def msg = "payload_json={\"\"content\"\": \"\"${message}\"\"}";
-    bat label: 'Discord webhook - Files', script: "curl -H \"Content-Type: multipart/form-data\" ${fileStr} -d \"${msg}\" ${webhookUrl}"
+    def msg = "{\"\"content\"\": \"\"${message}\"\"}";
+    bat label: 'Discord webhook - Files', script: "curl -H \"Content-Type: multipart/form-data\" ${fileStr} -F \"payload_json=${msg}\" ${webhookUrl}"
 }
