@@ -34,6 +34,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
         configuration = UnrealConfiguration.buildConfiguration;
     }
 
+    // TODO: Figure out this thing with where logs end up
     if(!logFile) {
         logFile = "${env.WORKSPACE}/logs/UnrealBuildLog-${env.BUILD_NUMBER}.log";
     }
@@ -45,7 +46,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
     }
 }
 
-def packageBuild(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
+def package(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
     
