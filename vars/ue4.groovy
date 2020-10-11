@@ -73,8 +73,10 @@ def runTestsNamed(String projectDir, String projectName, List<String> testNames,
     runUnrealAutomationTests(projectDir, projectName, ["RunTests Now ${testsToRun}"], minimumPriority);
 }
 
-def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = '') {
-    runUnrealAutomationTests(projectDir, projectName, ["RunCheckpointedTests Now ${content}"], minimumPriority);
+def runTestsCheckpointed(String projectDir, String projectName, List<String> testNames, String minimumPriority = '') {
+    def testsToRun = testNames.join('+');
+
+    runUnrealAutomationTests(projectDir, projectName, ["RunCheckpointedTests Now ${testsToRun}"], minimumPriority);
 }
 
 def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = '') {
