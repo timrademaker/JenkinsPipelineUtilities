@@ -17,11 +17,11 @@ class DiscordColor {
 
 def sendMessage(String webhookUrl, String message) {
     def msg = "{\"\"content\"\": \"\"${message}\"\"}"
-    bat label: 'Discord webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+    bat label: 'Discord Webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
 }
 
-def sendEmbed(String webhookUrl, String title, String description, String color = '0', List<String[]> fields = [], String footer = '', String url = '') {
-    def embed = [title: title, description: description, color: color.toInteger()]
+def sendEmbed(String webhookUrl, String title, String description = '', String color = '0', List<String[]> fields = [], String footer = '', String url = '') {
+    def embed = [title: title, description: description, color: color.toInteger()];
 
     if(footer) {
         embed.footer = [text: footer];
@@ -31,7 +31,7 @@ def sendEmbed(String webhookUrl, String title, String description, String color 
         embed.url = url;
     }
 
-    def embFields = []
+    def embFields = [];
     def i = 0;
     for(f in fields) {
         embFields[i] = [name: f[0], value: f[1]];
@@ -43,17 +43,23 @@ def sendEmbed(String webhookUrl, String title, String description, String color 
     }
 
     def msg = JsonOutput.toJson([embeds: [embed]]).replace('"','""');
-    bat label: 'Discord webhook - Embed', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
+    bat label: 'Discord Webhook - Embed', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
 }
 
-def sendFiles(String webhookUrl, List<String> files, String message = '') {
+def sendFile(String webhookUrl, String file, String message = '') {
+    sendFile(webhookUrl, [file], message);
+}
+
+def sendFile(String webhookUrl, List<String> files, String message = '') {
     def fileStr = '';
     for(i = 0; i < files.size(); ++i) {
         if(file.exists(files[i])) {
             fileStr += " -F \"file${i}=@${files[i]}\"";
+        } else {
+            log.warning("Tried to send file \"${files[i]}\", but this file doesn't exist!");
         }
     }
     
     def msg = "{\"\"content\"\": \"\"${message}\"\"}";
-    bat label: 'Discord webhook - Files', script: "curl -H \"Content-Type: multipart/form-data\" ${fileStr} -F \"payload_json=${msg}\" ${webhookUrl}"
+    bat label: 'Discord Webhook - Files', script: "curl -H \"Content-Type: multipart/form-data\" ${fileStr} -F \"payload_json=${msg}\" ${webhookUrl}"
 }
