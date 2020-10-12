@@ -97,19 +97,10 @@ private def runUnrealAutomationTests(String projectDir, String projectName, List
         automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
     }
 
-    def command = '';
-    for(cmd in automationCommands) {
-        if(cmd) {
-            command += "Automation ${cmd};"
-        }
-    }
-    // Remove trailing semicolon
-    command = "${command.substring(0, command.length() - 1)}";
-
     // Ensure the game has been built before trying to run tests
     build(projectDir, projectName, configuration: 'Development');
 
-    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
+    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"Automation ${automationCommands.join(';')};Quit\""
     
     if(result != 0) {
         unstable 'Some tests did not pass!'
