@@ -100,8 +100,13 @@ def swarmIDToDiscordID(groups, swarmID) {
 }
 
 def loadGroups(String groupFilePath) {
-    def content = readFile(file: groupFilePath);
-    return (new JsonSlurper().parseText(content));
+    def content = readFile(file: groupFilePath).split();
+
+    def groups = []
+    for(obj in content) {
+        groups += [new JsonSlurper().parseText(obj)];
+    }
+    return groups;
 }
 
 def saveGroups(groups, String outGroupFilePath) {
