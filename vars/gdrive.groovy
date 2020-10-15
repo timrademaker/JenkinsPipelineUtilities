@@ -1,4 +1,4 @@
-def upload(String sourceFilePath, String targetFileName, String clientID, String clientSecret, String refreshToken, List<String> parentFolderIDs = [])
+def upload(String sourceFilePath, String targetFileName, String clientID, String clientSecret, String refreshToken, String parentFolderID = '')
 {
    bat label: "Upload files to Google Drive", script: """
       SET "AccessToken="
@@ -12,7 +12,7 @@ def upload(String sourceFilePath, String targetFileName, String clientID, String
       SET AccessToken
       curl -X POST ^
       -H "Authorization: Bearer %AccessToken%" ^
-      -F "metadata={ kind: 'drive#file', name: '${targetFileName}', parents: ['${parentFolders.join('\',\'')}'] };type=application/json;charset=UTF-8" ^
+      -F "metadata={ kind: 'drive#file', name: '${targetFileName}', parents: ['${parentFolderID}'] };type=application/json;charset=UTF-8" ^
       -F "file=@${sourceFilePath}" ^
       https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart
    """

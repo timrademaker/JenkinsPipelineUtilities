@@ -1,10 +1,11 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-def createGroup(String groupName, List groupMembers) {
+def createGroup(String groupName, List groupMembers, String groupType) {
    return JsonOutput.toJson([
       name: groupName,
-      members: groupMembers
+      members: groupMembers,
+      type: groupType
    ]);
 }
 
@@ -42,13 +43,13 @@ def mentionGroup(groups, String groupName) {
 
     switch(groupType.toLower()) {
         case 'user':
-            tagTemplate = '<@{id}>';
+            tagTemplate = '<@[id]>';
             break;
         case 'role':
-            tagTemplate = '<@&${id}>';
+            tagTemplate = '<@&[id]}>';
             break;
         case 'channel':
-            tagTemplate = '<#{id}>';
+            tagTemplate = '<#[id]>';
             break;
         default:
             log.error("Tried to mention group '${groupName}', but this group has an invalid type '${groupType}'!");
@@ -62,7 +63,7 @@ def mentionGroup(groups, String groupName) {
         discordID = member.value;
 
         if(discordID?.trim()) {
-            mentionString += "${tagTemplate.replace('{id}', discordID)}, ";
+            mentionString += "${tagTemplate.replace('[id]', discordID)}, ";
         }
     }
 

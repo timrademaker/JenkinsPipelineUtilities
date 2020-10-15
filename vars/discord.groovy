@@ -20,7 +20,7 @@ def sendMessage(String webhookUrl, String message) {
     bat label: 'Discord webhook - Message', script: "curl -X POST -H \"Content-Type: application/json\" -d \"${msg}\" ${webhookUrl}"
 }
 
-def sendEmbed(String webhookUrl, String title, String description, String color = '0', List<String[]> fields = [], String footer = '', String url = '') {
+def sendEmbed(String webhookUrl, String title, String description = '', String color = '0', List<String[]> fields = [], String footer = '', String url = '') {
     def embed = [title: title, description: description, color: color.toInteger()]
 
     if(footer) {
