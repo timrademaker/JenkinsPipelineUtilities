@@ -38,5 +38,11 @@ def delete(String path) {
 def zip(String pathToCompress, String destinationPath) {
     assert(nameExists(pathToCompress));
 
-    powershell(label: 'Zip File', script: "Compress-Archive -Path '${pathToCompress}' -DestinationPath '${destinationPath}'");
+    powershell(label: "Zip '${pathToCompress}''", script: "Compress-Archive -Path '${pathToCompress}' -DestinationPath '${destinationPath}'");
+}
+
+def unzip(String zipFile, String destinationPath) {
+    assert(exists(zipFile));
+
+    powershell(label: "Unzip '${zipFile}''", script: "Expand-Archive -Path '${zipFile}' -DestinationPath '${destinationPath}'");
 }
