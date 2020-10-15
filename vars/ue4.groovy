@@ -34,6 +34,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
         configuration = UnrealConfiguration.buildConfiguration;
     }
 
+    // TODO: Figure out this thing with where logs end up
     if(!logFile) {
         logFile = "${env.WORKSPACE}/logs/UnrealBuildLog-${env.BUILD_NUMBER}.log";
     }
@@ -45,7 +46,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
     }
 }
 
-def packageBuild(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
+def package(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
     
@@ -72,8 +73,10 @@ def runTestsNamed(String projectDir, String projectName, List<String> testNames,
     runUnrealAutomationTests(projectDir, projectName, ["RunTests Now ${testsToRun}"], minimumPriority);
 }
 
-def runTestsContaining(String projectDir, String projectName, String content, String minimumPriority = '') {
-    runUnrealAutomationTests(projectDir, projectName, ["RunCheckpointedTests Now ${content}"], minimumPriority);
+def runTestsCheckpointed(String projectDir, String projectName, List<String> testNames, String minimumPriority = '') {
+    def testsToRun = testNames.join('+');
+
+    runUnrealAutomationTests(projectDir, projectName, ["RunCheckpointedTests Now ${testsToRun}"], minimumPriority);
 }
 
 def runTestsFiltered(String projectDir, String projectName, String filter, String minimumPriority = '') {
@@ -94,19 +97,10 @@ private def runUnrealAutomationTests(String projectDir, String projectName, List
         automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
     }
 
-    def command = '';
-    for(cmd in automationCommands) {
-        if(cmd) {
-            command += "Automation ${cmd};"
-        }
-    }
-    // Remove trailing semicolon
-    command = "${command.substring(0, command.length() - 1)}";
-
     // Ensure the game has been built before trying to run tests
     build(projectDir, projectName, configuration: 'Development');
 
-    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"${command};Quit\""
+    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"Automation ${automationCommands.join(';')};Quit\""
     
     if(result != 0) {
         unstable 'Some tests did not pass!'

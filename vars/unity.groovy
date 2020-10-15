@@ -9,7 +9,7 @@ def init(String unityDir) {
     UnityConfiguration.engineRootDirectory = unityDir;
 }
 
-def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = false, String additionalParameters = '') {
+def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = true, String additionalParameters = '') {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
     assert(file.dirExists(projectDir) && projectDir != '');
     projectDir = projectDir.replace('\\', '/');
@@ -19,7 +19,7 @@ def execute(String projectDir, String methodToExecute, String buildTarget = '', 
     }
 
     def buildTargetStr = '';
-    if(buildTarget) {
+    if(buildTarget && buildTargetIsValid(buildTarget)) {
         buildTargetStr = "-buildTarget ${buildTarget}";
     }
 
@@ -31,12 +31,12 @@ def execute(String projectDir, String methodToExecute, String buildTarget = '', 
     }
 }
 
-def runTests(String projectDir, String testPlatform = '', List<String> testFilters = [], List<String> testCategories = [], String testSettingsFile = '', String testResultFile = '', Boolean noGraphics = false) {
+def runTests(String projectDir, String testPlatform = '', List<String> testFilters = [], List<String> testCategories = [], String testSettingsFile = '', String testResultFile = '', Boolean noGraphics = true) {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
     assert(file.dirExists(projectDir) && projectDir != '');
     projectDir = projectDir.replace('\\', '/');
 
-    def argumentString = "-batchmode -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests";
+    def argumentString = "-batchmode -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests -silent-crashes";
 
     if(testPlatformIsValid(testPlatform)) {
         argumentString += " -testPlatform ${testPlatform}"

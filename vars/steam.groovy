@@ -3,7 +3,7 @@ class SteamConfig {
 }
 
 def setup(String steamcmdFolder = "${env.WORKSPACE}/steamcmd") {
-    if(!file.dirExists(steamcmdFolder)) {
+    if(!file.exists("${steamcmdFolder}/steamcmd.exe")) {
         file.createDir("${env.WORKSPACE}/temp");
         def outputFile = "${env.WORKSPACE}/temp/steamcmd.zip";
 
@@ -14,14 +14,16 @@ def setup(String steamcmdFolder = "${env.WORKSPACE}/steamcmd") {
     }
 
     SteamConfig.steamcmdExe = "${steamcmdFolder}/steamcmd.exe";
+
+    bat label: 'Set Up SteamCMD', script: "\"${SteamConfig.steamcmdExe}\" +quit";
 }
 
-def createAppManifest(String appID, String depotID, String contentRoot, String buildDescription = '', Boolean isPreview = false, String setLiveOnBranch = '', String buildOutputFolder = 'SteamBuild', String localContentServerPath = '') {
+def createAppManifest(String appID, String depotID, String contentRoot, String buildDescription = 'No description', String setLiveOnBranch = '', String buildOutputFolder = '${env.WORKSPACE}/SteamBuild', Boolean isPreview = false, String localContentServerPath = '') {
     def appManifest = libraryResource 'com/timrademaker/app_build_template.vdf'
     appManifest = appManifest.replace('<APP_ID>', appID);
     appManifest = appManifest.replace('<DEPOT_ID>', depotID);
     appManifest = appManifest.replace('<CONTENT_ROOT>', contentRoot);
-    appManifest = appManifest.replace('<BUILD_DESCRIPTION>', "${buildDescription ? buildDescription : 'No description'}");
+    appManifest = appManifest.replace('<BUILD_DESCRIPTION>', buildDescription);
     appManifest = appManifest.replace('<IS_PREVIEW>', "${isPreview ? '1' : '0'}");
     appManifest = appManifest.replace('<LOCAL_CONTENT_SERVER_PATH>', localContentServerPath);
     appManifest = appManifest.replace('<SET_LIVE_ON_BRANCH>', setLiveOnBranch);
