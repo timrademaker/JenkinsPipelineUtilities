@@ -34,3 +34,9 @@ def delete(String path) {
         powershell(label: 'Delete item', returnStdout: false, script: "Remove-Item '${path}' -Recurse -Confirm:\$false");
     }
 }
+
+def zip(String pathToCompress, String destinationPath) {
+    assert(nameExists(pathToCompress));
+
+    powershell(label: 'Zip File', script: "Compress-Archive -Path '${pathToCompress}' -DestinationPath '${destinationPath}'");
+}
