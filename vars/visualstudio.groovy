@@ -29,10 +29,16 @@ def build(String projectPath, String platform = '', String configuration = '') {
     bat(label: "Build Visual Studio Solution", script: "CALL \"${VisualStudioConfig.msBuildPath}\" \"${projectPath}\" /t:build ${platform ? '/p:Platform=\"' + platform + '\"' : ''} ${configuration ? '/p:Configuration=\"'+ configuration + '\"': ''}");
 }
 
-def vsTest(String testDLL, String platform = '', String logger = 'trx') {
-    assert(file.exists(testDLL));
+def vsTest(String testFile, String platform = '', String logger = 'trx') {
+    vsTest([testFile], platform, logger);
+}
+
+def vsTest(List<String> testFiles, String platform = '', String logger = 'trx') {
+    for(f in testFiles) {
+        assert(file.exists(f));
+    }
     
-    def result = bat(label: "Run Visual Studio Test", returnStatus: true, script: "CALL \"${VisualStudioConfig.vsTestPath}\" \"${testDLL}\" ${platform ? '--Platform:\"' + platform + '\"' : ''} --Logger:\"${logger}\"");
+    def result = bat(label: "Run Visual Studio Test", returnStatus: true, script: "CALL \"${VisualStudioConfig.vsTestPath}\" \"${testFiles.join('\" \"')}\" ${platform ? '--Platform:\"' + platform + '\"' : ''} --Logger:\"${logger}\"");
     
     if(result != 0) {
         unstable 'Some tests did not pass!'
