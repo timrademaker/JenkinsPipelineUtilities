@@ -7,7 +7,7 @@ def setup(String steamcmdFolder = "${env.WORKSPACE}/steamcmd") {
         file.createDir("${env.WORKSPACE}/temp");
         def outputFile = "${env.WORKSPACE}/temp/steamcmd.zip";
 
-        powershell label: 'Download SteamCMD', script: "Invoke-Webrequest -URI http://media.steampowered.com/installer/steamcmd.zip -OutFile \"${outputFile}\""
+        file.download('http://media.steampowered.com/installer/steamcmd.zip', outputFile);
         file.unzip("${env.WORKSPACE}/temp/steamcmd.zip", steamcmdFolder);
         
         file.delete(outputFile);

@@ -46,3 +46,7 @@ def unzip(String zipFile, String destinationPath) {
 
     powershell(label: "Unzip '${zipFile}''", script: "Expand-Archive -Path '${zipFile}' -DestinationPath '${destinationPath}'");
 }
+
+def download(String downloadUrl, String outputFile) {
+    powershell(label: 'Download File', script: "Invoke-Webrequest -URI ${downloadUrl} -OutFile \"${outputFile}\"");
+}
