@@ -78,10 +78,8 @@ def tryDeploy(String steamCredentials, String appManifest) {
 private def deploy(String steamCredentials, String appManifest, String steamGuardCode = '') {
     def output = '';
     withCredentials([usernamePassword(credentialsId: "${steamCredentials}", passwordVariable: 'STEAM_PASS', usernameVariable: 'STEAM_USER')]) {
-        output = bat label: 'Steam build', returnStdout: true, script: """\"${SteamConfig.steamcmdExe}\" +login \"${env.STEAM_USER}\" \"${env.STEAM_PASS}\" ${steamGuardCode} +run_app_build \"${appManifest}\" +quit > steamoutput.txt
-        type steamoutput.txt
-        """
-        
+        bat label: 'Steam build', returnStdout: true, script: "\"${SteamConfig.steamcmdExe}\" +login \"${env.STEAM_USER}\" \"${env.STEAM_PASS}\" ${steamGuardCode} +run_app_build \"${appManifest}\" +quit > steamcmdoutput.txt"
+        output = readFile 'steamcmdoutput.txt';
         file.delete('steamoutput.txt');
     }
 
