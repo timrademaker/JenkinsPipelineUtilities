@@ -71,7 +71,7 @@ def validateData(String projectDir, String projectName, Bool turnUnstableOnFailu
     def project = "${projectDir.startsWith(env.WORKSPACE) ? projectDir : env.WORKSPACE + '/' + projectDir}/${projectName}.uproject";
     assert(file.exists(project));
     
-    def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-Cmd.exe\" \"${project}\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -run=DataValidation"
+    def result = bat label: 'Validate Data', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-Cmd.exe\" \"${project}\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -run=DataValidation"
 
     if(result != 0 && turnUnstableOnFailure) {
         unstable 'Data validation returned with one or more warnings!'
