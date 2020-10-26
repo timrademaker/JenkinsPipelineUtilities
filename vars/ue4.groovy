@@ -46,7 +46,7 @@ def build(String projectDir, String projectName, String logFile = '', String pla
     }
 }
 
-def package(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
+def packageProject(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
     assert(file.exists("${projectDir}/${projectName}.uproject"));
     assert(outputDirectory);
     
@@ -67,7 +67,7 @@ def package(String projectDir, String projectName, String outputDirectory, Strin
 
 /*  Data validation */
 
-def validateData(String projectDir, String projectName, Bool turnUnstableOnFailure = false) {
+def validateData(String projectDir, String projectName, Boolean turnUnstableOnFailure = false) {
     def project = "${projectDir.startsWith(env.WORKSPACE) ? projectDir : env.WORKSPACE + '/' + projectDir}/${projectName}.uproject";
     assert(file.exists(project));
     
