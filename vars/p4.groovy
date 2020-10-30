@@ -1,22 +1,24 @@
 class P4Config {
     static String credentials = '';
     static String workspaceNameFormat = 'jenkins-${JOB_BASE_NAME}';
+    static String depotView = '';
     static String viewMapping = '';
     static String host = '';
 }
 
-def init(String credentials, String workspaceNameFormat, String viewMapping = '', String host = '') {
-    P4Config.credentials = credential;
+def init(String credentials, String workspaceNameFormat, String depotView = '', String viewMapping = '', String host = '') {
+    P4Config.credentials = credentials;
     P4Config.workspaceNameFormat = workspaceNameFormat;
+    P4Config.depotView = depotView;
     P4Config.viewMapping = viewMapping;
     P4Config.host = host;
 }
 
 def pull(deleteGeneratedFiles = false, quiet = true, forceClean = false) {
     if(forceClean) {
-        p4sync charset: 'none', credential: P4Config.credentials, format: P4Config.workspaceNameFormat, populate: forceClean(have: false, parallel: [enable: true, minbytes: '1024', minfiles: '1', threads: '4'], pin: '', quiet: quiet), source: depotSource(P4Config.viewMapping)
+        p4sync charset: 'none', credential: P4Config.credentials, format: P4Config.workspaceNameFormat, populate: forceClean(have: false, parallel: [enable: true, minbytes: '1024', minfiles: '1', threads: '4'], pin: '', quiet: quiet), source: depotSource(P4Config.depotView)
     } else {
-        p4sync charset: 'none', credential: P4Config.credentials, format: P4Config.workspaceNameFormat, populate: autoClean(delete: deleteGeneratedFiles, modtime: false, parallel: [enable: true, minbytes: '1024', minfiles: '1', threads: '4'], pin: '', quiet: quiet, replace: true, tidy: false), source: depotSource(P4Config.viewMapping)
+        p4sync charset: 'none', credential: P4Config.credentials, format: P4Config.workspaceNameFormat, populate: autoClean(delete: deleteGeneratedFiles, modtime: false, parallel: [enable: true, minbytes: '1024', minfiles: '1', threads: '4'], pin: '', quiet: quiet, replace: true, tidy: false), source: depotSource(P4Config.depotView)
     }
 }
 
