@@ -111,7 +111,7 @@ private def runUnrealAutomationTests(String projectDir, String projectName, List
     }
 
     // Ensure the game has been built before trying to run tests
-    build(projectDir, projectName, configuration: 'Development');
+    build(projectDir, projectName, '', '', 'Development');
 
     def result = bat label: 'Run Automation Tests', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-cmd.exe\" \"${projectDir}/${projectName}.uproject\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -NoPause -NoSplash -NoSound -ExecCmds=\"Automation ${automationCommands.join(';')};Quit\""
     
