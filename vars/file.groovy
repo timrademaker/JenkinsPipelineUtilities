@@ -35,16 +35,20 @@ def delete(String path) {
     }
 }
 
-def zip(String pathToCompress, String destinationPath) {
+def zip(String pathToCompress, String destinationPath, Boolean optimalCompression = true) {
     assert(nameExists(pathToCompress));
 
-    powershell(label: "Zip '${pathToCompress}''", script: "Compress-Archive -Path '${pathToCompress}' -DestinationPath '${destinationPath}'");
+    compressionLevel = optimalCompression ? '[System.IO.Compression.CompressionLevel]::Optimal' : '[System.IO.Compression.CompressionLevel]::Fastest';
+
+    powershell(label: "Zip '${pathToCompress}''", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::CreateFromDirectory('${pathToCompress}', '${destinationPath}', ${compressionLevel}, $false)""");
 }
 
 def unzip(String zipFile, String destinationPath) {
     assert(exists(zipFile));
 
-    powershell(label: "Unzip '${zipFile}''", script: "Expand-Archive -Path '${zipFile}' -DestinationPath '${destinationPath}'");
+    powershell(label: "Unzip '${zipFile}''", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory('${zipFile}', '${destinationPath}')""");
 }
 
 def download(String downloadUrl, String outputFile) {
