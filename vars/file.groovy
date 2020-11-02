@@ -41,7 +41,7 @@ def zip(String pathToCompress, String destinationPath, Boolean optimalCompressio
     compressionLevel = optimalCompression ? '[System.IO.Compression.CompressionLevel]::Optimal' : '[System.IO.Compression.CompressionLevel]::Fastest';
 
     powershell(label: "Zip '${pathToCompress}''", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [System.IO.Compression.ZipFile]::CreateFromDirectory('${pathToCompress}', '${destinationPath}', ${compressionLevel}, $false)""");
+    [System.IO.Compression.ZipFile]::CreateFromDirectory('${pathToCompress}', '${destinationPath}', ${compressionLevel}, \$false)""");
 }
 
 def unzip(String zipFile, String destinationPath) {
