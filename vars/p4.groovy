@@ -1,4 +1,4 @@
-class P4Config {
+class P4Config implements Serializable {
     static String credentials = '';
     static String workspaceNameFormat = 'jenkins-${JOB_BASE_NAME}';
     static String workspaceTemplate = '';

@@ -1,4 +1,4 @@
-class UnrealConfiguration {
+class UnrealConfiguration implements Serializable {
     static String engineRootDirectory = 'C:/Program Files/Epic Games/UE_4.25';
     static String targetPlatform = 'Win64';
     static String buildConfiguration = 'Development';

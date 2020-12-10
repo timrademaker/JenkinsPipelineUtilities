@@ -1,4 +1,4 @@
-class UnityConfiguration {
+class UnityConfiguration implements Serializable {
     static String engineRootDirectory = '';
 }
 

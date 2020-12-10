@@ -1,4 +1,4 @@
-class VisualStudioConfig {
+class VisualStudioConfig implements Serializable {
     static String visualStudioBaseDirectory = 'C:/Program Files (x86)/Microsoft Visual Studio/2019/Community';
     static String msBuildPath = "${visualStudioBaseDirectory}/MSBuild/Current/Bin/MSBuild.exe";
     static String vsTestPath = "${visualStudioBaseDirectory}/Common7/IDE/CommonExtensions/Microsoft/TestWindow/vstest.console.exe";

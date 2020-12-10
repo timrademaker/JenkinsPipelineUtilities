@@ -1,4 +1,4 @@
-class SteamConfig {
+class SteamConfig implements Serializable {
     static String steamcmdExe = "/steamcmd/steamcmd.exe"
 }
 

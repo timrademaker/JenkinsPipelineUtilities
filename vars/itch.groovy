@@ -1,4 +1,4 @@
-class ItchConfiguration {
+class ItchConfiguration implements Serializable {
     static String butlerExe = '';
     static String user = '';
     static String apiKeyID = '';
