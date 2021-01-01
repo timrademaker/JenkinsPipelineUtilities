@@ -25,8 +25,8 @@ def push(String gameDirectory, String gameName, String channel, Boolean dryRun =
     }
 
     withCredentials([string(credentialsId: ItchConfiguration.apiKeyID, variable: 'BUTLER_API_KEY')]) {
-        bat label: 'Upload build to itch.io', script: """${config.butlerExe} login
-                        ${ItchConfiguration.butlerExe} push --if-changed --assume-yes ${ignoreStr} ${dryRun ? '--dry-run' : ''} '${gameDirectory}' '${ItchConfiguration.username}/${gameName}:${channel}'
+        bat label: 'Upload build to itch.io', script: """${ItchConfiguration.butlerExe} login
+                        ${ItchConfiguration.butlerExe} push --if-changed --assume-yes ${ignoreStr} ${dryRun ? '--dry-run' : ''} "${gameDirectory}" "${ItchConfiguration.user}/${gameName}:${channel}"
                         ${ItchConfiguration.butlerExe} logout --assume-yes"""
     }
 }
