@@ -4,40 +4,24 @@ import groovy.json.JsonOutput
 def createGroup(String groupName, List groupMembers, String groupType) {
    return JsonOutput.toJson([
       name: groupName,
-      members: groupMembers,
+      discordID: groupDiscordID,
+      swarmID: groupSwarmID,
       type: groupType
    ]);
 }
 
-def getGroupMembers(groups, String groupName) {
-    for(group in groups) {
-        if(group.name == groupName) {
-            return group.members;
-        }
-    }
-
-    log.error("Tried to get group members for group '${groupName}', but this group couldn't be found!");
-    return [];
-}
-
-def getGroupType(groups, String groupName) {
-    for(group in groups) {
-        if(group.name == groupName) {
-            return group.type;
-        }
-    }
-
-    log.error("Tried to get group type for group '${groupName}', but this group couldn't be found!");
-    return [];
-}
-
 def mentionGroup(groups, String groupName) {
-    def groupMembers = getGroupMembers(groups, groupName);
-    def groupType = getGroupType(groups, groupName);
+   def groupType = ""
+   def discordID = ""
+   def groupsParsed = new JsonSlurper().parseText(groups)
 
-    if(!groupMembers && !groupType) {
-        return '';
-    }
+   groupsParsed.groups.each { group ->
+      if (group.name == groupName)
+      {
+         groupType = group.type
+         discordID = group.discordID
+      }
+   }
 
     def tagTemplate = '';
 
@@ -59,15 +43,12 @@ def mentionGroup(groups, String groupName) {
 
     def mentionString = '';
 
-    for(member in groupMembers) {
-        discordID = member.value;
-
-        if(discordID?.trim()) {
-            mentionString += "${tagTemplate.replace('[id]', discordID)}, ";
-        }
-    }
-
-    // Remove trailing ', '
+     if(discordID?.trim()) {
+         mentionString += "${tagTemplate.replace('[id]', discordID)}, ";
+     }
+   
+    // Not needed anymore?
+    Remove trailing ', '
     message = message.substring(0, message.length() - 2);
 
     message = "${groupName}: ${message}";
