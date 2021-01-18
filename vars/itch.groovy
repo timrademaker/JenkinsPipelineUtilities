@@ -21,7 +21,7 @@ def push(String gameDirectory, String gameName, String channel, Boolean dryRun =
 
     String ignoreStr = '';
     for(file in ignoredFiles) {
-        ignoreStr += "--ignore '${file}' ";
+        ignoreStr += "--ignore \"${file}\" ";
     }
 
     withCredentials([string(credentialsId: ItchConfiguration.apiKeyID, variable: 'BUTLER_API_KEY')]) {
