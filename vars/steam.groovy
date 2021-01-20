@@ -50,7 +50,7 @@ def tryDeploy(String steamCredentials, String appManifest) {
     def result = deploy(steamCredentials, appManifest);
 
     def attempts = 0;
-    while((result & (SteamResult.needsGuardCode | SteamResult.guardCodeMismatch)) != 0 && attempts < 3) {
+    while((result & (SteamResult.needsTwoFactorCode | SteamResult.needsGuardCode | SteamResult.guardCodeMismatch)) != 0 && attempts < 3) {
         def guardCode = '';
 
         timeout(time: 2, unit: 'MINUTES') {
@@ -61,7 +61,7 @@ def tryDeploy(String steamCredentials, String appManifest) {
         }
 
         if(guardCode) {
-            result = deploy(steamCredentials, appManifest, guardCode);
+            result = deploy(steamCredentials, appManifest, guardCode, (result == SteamResult.needsGuardCode) ? false : true);
         } else {
             result = SteamResult.failed;
         }
@@ -75,10 +75,14 @@ def tryDeploy(String steamCredentials, String appManifest) {
     }
 }
 
-private def deploy(String steamCredentials, String appManifest, String steamGuardCode = '') {
+private def deploy(String steamCredentials, String appManifest, String steamGuardCode = '', Boolean guardCodeIsTwoFactorCode = true) {
     def output = '';
     withCredentials([usernamePassword(credentialsId: "${steamCredentials}", passwordVariable: 'STEAM_PASS', usernameVariable: 'STEAM_USER')]) {
         try {
+            if(!guardCodeIsTwoFactorCode) {
+                bat label: 'Steam build', returnStdout: true, script: "\"${SteamConfig.steamcmdExe}\" set_steam_guard_code ${steamGuardCode} +quit";
+            }
+            
             bat label: 'Steam build', returnStdout: true, script: "\"${SteamConfig.steamcmdExe}\" +login \"${env.STEAM_USER}\" \"${env.STEAM_PASS}\" ${steamGuardCode} +run_app_build \"${appManifest}\" +quit > steamcmdoutput.txt"
             return;
         }
@@ -92,7 +96,7 @@ private def deploy(String steamCredentials, String appManifest, String steamGuar
 
     if(output.contains('need two-factor code')) {
         log.error('Unable to log into SteamCMD. 2FA code is required.');
-        return SteamResult.needsGuardCode;
+        return SteamResult.needsTwoFactorCode;
     } else if(output.contains('Invalid Password')) {
         log.error('Unable to log into SteamCMD. Invalid password provided.');
         return SteamResult.invalidPassword;
@@ -105,6 +109,9 @@ private def deploy(String steamCredentials, String appManifest, String steamGuar
     } else if(output.contains('Rate Limit Exceeded')) {
         log.error('Unable to log into SteamCMD. Rate limit exceeded.')
         return SteamResult.rateLimitExceeded;
+    } else if(output.contains('Account Logon Denied')) {
+        log.error('Unable to log into SteamCMD. Steam Guard code is required.')
+        return SteamResult.needsGuardCode;
     }
 
     return SteamResult.success;
@@ -114,8 +121,9 @@ class SteamResult {
     static final int success = 0;
     static final int failed = 1 << 1;
     static final int invalidPassword = 1 << 2;
-    static final int needsGuardCode = 1 << 3;
+    static final int needsTwoFactorCode = 1 << 3;
     static final int guardCodeMismatch = 1 << 4;
     static final int assertionFailed = 1 << 5;
     static final int rateLimitExceeded = 1 << 6;
+    static final int needsGuardCode = 1 << 7;
 }
