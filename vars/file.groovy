@@ -35,19 +35,34 @@ def delete(String path) {
     }
 }
 
+def copy(String fromPath, String toPath, Boolean force = false, Boolean recurse = true) {
+    if(nameExists(fromPath)) {
+        powershell(label: 'Copy item', returnStdout: false, script: "Copy-Item -Path '${fromPath}' -Destination '${toPath}' ${recurse ? '-Recurse' : ''} ${force ? '-Force' : ''}");
+    }
+    else {
+        log.error("Tried to copy '${fromPath}', but this path couldn't be found!");
+    }
+}
+
 def zip(String pathToCompress, String destinationPath, Boolean optimalCompression = true) {
-    assert(nameExists(pathToCompress));
+    if(!nameExists(pathToCompress)) {
+        log.error("Unable to zip ${pathToCompress} as the path can't be found");
+        return;
+    }
 
     compressionLevel = optimalCompression ? '[System.IO.Compression.CompressionLevel]::Optimal' : '[System.IO.Compression.CompressionLevel]::Fastest';
 
-    powershell(label: "Zip '${pathToCompress}''", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
+    powershell(label: "Zip '${pathToCompress}'", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::CreateFromDirectory('${pathToCompress}', '${destinationPath}', ${compressionLevel}, \$false)""");
 }
 
 def unzip(String zipFile, String destinationPath) {
-    assert(exists(zipFile));
+    if(!exists(zipFile)) {
+        log.error("Unable to unzip ${zipFile} as the archive can't be found");
+        return;
+    }
 
-    powershell(label: "Unzip '${zipFile}''", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
+    powershell(label: "Unzip '${zipFile}'", script: """Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory('${zipFile}', '${destinationPath}')""");
 }
 
