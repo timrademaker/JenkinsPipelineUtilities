@@ -44,6 +44,14 @@ def copy(String fromPath, String toPath, Boolean force = false, Boolean recurse 
     }
 }
 
+def rename(String path, String newName, Boolean force = false) {
+    if(nameExists(path)) {
+        powershell(label: 'Rename item', returnStdout: false, script: "Rename-Item -Path '${path}' -NewName '${newName}' ${force ? '-Force' : ''}");
+    } else {
+        log.error("Tried to rename '${path}', but this couldn't be found!");
+    }
+}
+
 def zip(String pathToCompress, String destinationPath, Boolean optimalCompression = true) {
     if(!nameExists(pathToCompress)) {
         log.error("Unable to zip ${pathToCompress} as the path can't be found");
