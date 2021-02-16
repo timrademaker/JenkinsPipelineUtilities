@@ -26,8 +26,7 @@ def execute(String projectDir, String methodToExecute, String buildTarget = '', 
     def exitCode = bat label: 'Execute Unity Method', returnStatus: true, script: "CALL \"${UnityConfiguration.engineRootDirectory}/Editor/Unity.exe\" -batchmode -project \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -executeMethod ${methodToExecute} ${additionalParameters} -logFile \"${logFile}\" -quit"
 
     if(exitCode != 0) {
-        log.error("Unity method exited with a non-zero exit code!");
-        failStage();
+        failStage('Unity method exited with a non-zero exit code!');
     }
 }
 

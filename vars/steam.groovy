@@ -70,8 +70,7 @@ def tryDeploy(String steamCredentials, String appManifest) {
     }
 
     if(result != SteamResult.success) {
-        log.error("Failed to deploy to Steam");
-        failStage();
+        failStage('Failed to deploy to Steam');
     }
 }
 

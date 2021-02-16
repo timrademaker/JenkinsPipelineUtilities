@@ -1,3 +1,3 @@
-def call() {
-    currentBuild.result = 'FAILURE';
+def call(String errorMessage = '') {
+    error errorMessage;
 }
