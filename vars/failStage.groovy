@@ -1,3 +1,3 @@
 def call() {
-    currentBuild.result = 'FAILED';
+    currentBuild.result = 'FAILURE';
 }
