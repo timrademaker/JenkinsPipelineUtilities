@@ -87,6 +87,7 @@ private def deploy(String steamCredentials, String appManifest, String steamGuar
         }
         catch (Exception e) {
             output = readFile 'steamcmdoutput.txt';
+            log(output);
         }
         finally {
             file.delete('steamcmdoutput.txt');
