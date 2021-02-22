@@ -40,7 +40,13 @@ def createDepotManifest(String depotID, String contentRoot, String excludes = '*
     depotManifest = depotManifest.replace('<LOCAL_PATH>', localPath);
     depotManifest = depotManifest.replace('<DEPOT_PATH>', depotPath);
     depotManifest = depotManifest.replace('<SHOULD_ADD_CONTENT_RECURSIVELY>', "${addContentRecursively ? '1' : '0'}");
-    depotManifest = depotManifest.replace('<EXCLUDED_FILES>', excludes);
+    
+    def excludeString = '';
+    if(excludes.length() > 0) {
+        def excludeList = excludes.split(';');
+        excludeString = '"FileExclusion" "' + excludeList.join('"\n  "FileExclusion" "') + '"';
+    }
+    depotManifest = depotManifest.replace('<EXCLUSION_STRING>', excludeString);
 
     file.write("${env.WORKSPACE}/depot_build_${depotID}.vdf", depotManifest);
     return "${env.WORKSPACE}/depot_build_${depotID}.vdf";

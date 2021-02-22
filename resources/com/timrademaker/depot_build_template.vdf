@@ -1,18 +1,18 @@
 "DepotBuildConfig"
 {
-	// Set your assigned depot ID here
-	"DepotID" "<DEPOT_ID>"
+  // Set your assigned depot ID here
+  "DepotID" "<DEPOT_ID>"
 
-	// Set a root for all content.
-	// All relative paths specified below (LocalPath in FileMapping entries, and FileExclusion paths)
-	// will be resolved relative to this root.
-	// If you don't define ContentRoot, then it will be assumed to be
-	// the location of this script file, which probably isn't what you want
-	"ContentRoot"	"<CONTENT_ROOT>"
+  // Set a root for all content.
+  // All relative paths specified below (LocalPath in FileMapping entries, and FileExclusion paths)
+  // will be resolved relative to this root.
+  // If you don't define ContentRoot, then it will be assumed to be
+  // the location of this script file, which probably isn't what you want
+  "ContentRoot"    "<CONTENT_ROOT>"
 
   "FileMapping"
   {
-  	// This can be a full path, or a path relative to ContentRoot
+    // This can be a full path, or a path relative to ContentRoot
     "LocalPath" "<LOCAL_PATH>"
     
     // This is a path relative to the install folder of your game
@@ -24,7 +24,6 @@
     "recursive" "<SHOULD_ADD_CONTENT_RECURSIVELY>"
   }
 
-	// but exclude all symbol files  
-	// This can be a full path, or a path relative to ContentRoot
-    "FileExclusion" "<EXCLUDED_FILES>"
+  // Excludes can be a full path, or a path relative to ContentRoot
+  <EXCLUSION_STRING>
 }
