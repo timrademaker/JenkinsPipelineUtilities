@@ -112,6 +112,18 @@ private def deploy(String steamCredentials, String appManifest, String steamGuar
     } else if(output.contains('Account Logon Denied')) {
         log.error('Unable to log into SteamCMD. Steam Guard code is required.')
         return SteamResult.needsGuardCode;
+    } else if(output.contains('ERROR!')) {
+        if(output.contains('Build for depot')) {
+            if(output.contains('failed : Timeout')) {
+                log.error("Timed out while building for depot.");
+            } else {
+                log.error("Error while building for depot.");
+            }
+        } else if(output.contains('Content root folder does not exist')) {
+            log.error("Content root folder does not exist.");
+        }
+        
+        return SteamResult.failed;
     }
 
     return SteamResult.success;
