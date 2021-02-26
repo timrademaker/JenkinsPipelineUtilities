@@ -6,7 +6,7 @@ class VisualStudioConfig implements Serializable {
 
 def init(String visualStudioBaseDirectory, String msBuildPath = '', String vsTestPath = '') {
     if(!file.dirExists(visualStudioBaseDirectory)) {
-        failStage("Visual Studio directory not found at specified path! (${visualStudioDirectory})");
+        failStage("Visual Studio directory not found at specified path! (${visualStudioBaseDirectory})");
     }
 
     VisualStudioConfig.visualStudioBaseDirectory = visualStudioBaseDirectory;
