@@ -5,7 +5,9 @@ class VisualStudioConfig implements Serializable {
 }
 
 def init(String visualStudioBaseDirectory, String msBuildPath = '', String vsTestPath = '') {
-    assert(file.dirExists(visualStudioBaseDirectory));
+    if(!file.dirExists(visualStudioBaseDirectory)) {
+        failStage("Visual Studio directory not found at specified path! (${visualStudioDirectory})");
+    }
 
     VisualStudioConfig.visualStudioBaseDirectory = visualStudioBaseDirectory;
 
@@ -23,8 +25,16 @@ def init(String visualStudioBaseDirectory, String msBuildPath = '', String vsTes
 }
 
 def build(String projectPath, String platform = '', String configuration = '') {
-    assert(file.nameExists(projectPath));
-    assert(file.exists(VisualStudioConfig.msBuildPath));
+    if(!file.nameExists(projectPath)) {
+        failStage("Project directory not found at specified path! (${projectPath})");
+    }
+    if(!file.exists(VisualStudioConfig.msBuildPath)) {
+        if(VisualStudioConfig.visualStudioBaseDirectory == '') {
+            failStage("Visual Studio base directory not set! Did you call visualstudio.init?");
+        } else {
+            failStage("MSBuild not found! (${VisualStudioConfig.msBuildPath})");
+        }
+    }
     
     bat(label: "Build Visual Studio Solution", script: "CALL \"${VisualStudioConfig.msBuildPath}\" \"${projectPath}\" /t:build ${platform ? '/p:Platform=\"' + platform + '\"' : ''} ${configuration ? '/p:Configuration=\"'+ configuration + '\"': ''}");
 }
@@ -35,7 +45,9 @@ def vsTest(String testFile, String platform = '', List<String> testNames = [], S
 
 def vsTest(List<String> testFiles, String platform = '', List<String> testNames = [], String logger = 'trx', String additionalFlags = '') {
     for(f in testFiles) {
-        assert(file.exists(f));
+        if(!file.exists(f)) {
+            failStage("Test file not found! (${f})");
+        }
     }
     
     def result = bat(label: "Run Visual Studio Test", returnStatus: true, script: "CALL \"${VisualStudioConfig.vsTestPath}\" \"${testFiles.join('\" \"')}\" ${platform ? '--Platform:\"' + platform + '\"' : ''} ${testNames ? '/Tests:' + testNames.join(',') : ''} --Logger:\"${logger}\" ${additionalFlags}");
