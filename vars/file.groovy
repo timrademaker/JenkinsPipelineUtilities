@@ -1,14 +1,26 @@
 def exists(String filePath) {
+    if(filePath == '') {
+        return false;
+    }
+
     def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${filePath}' -PathType Leaf");
     return ret.replaceAll("\\s", "").equals("True");
 }
 
 def dirExists(String directory) {
+    if(directory == '') {
+        return false;
+    }
+
     def ret = powershell(label: 'Check if folder exists', returnStdout: true, script: "Test-Path '${directory}' -PathType Container");
     return ret.replaceAll("\\s", "").equals("True");
 }
 
 def nameExists(String path) {
+    if(path == '') {
+        return false;
+    }
+
     def ret = powershell(label: 'Check if file exists', returnStdout: true, script: "Test-Path '${path}' -PathType Any");
     return ret.replaceAll("\\s", "").equals("True");
 }
