@@ -6,7 +6,7 @@ class UnrealConfiguration implements Serializable {
 
 
 def init(String ueDir, String platform = '', String configuration = '') {
-    assert(file.dirExists(ueDir));
+    ensureUnrealDirectoryExists(ueDir, true);
 
     UnrealConfiguration.engineRootDirectory = ueDir;
 
@@ -20,7 +20,9 @@ def init(String ueDir, String platform = '', String configuration = '') {
 }
 
 def build(String projectDir, String projectName, String logFile = '', String platform = '', String configuration = '') {
-    assert(file.exists("${projectDir}/${projectName}.uproject"));
+    ensureUnrealDirectoryExists(UnrealConfiguration.engineRootDirectory);
+    
+    ensureProjectExists(projectDir, projectName);
 
     if(!file.dirExists("${projectDir}/Source")) {
         return;
@@ -47,8 +49,12 @@ def build(String projectDir, String projectName, String logFile = '', String pla
 }
 
 def packageProject(String projectDir, String projectName, String outputDirectory, String logFile = '', String platform = '', String configuration = '') {
-    assert(file.exists("${projectDir}/${projectName}.uproject"));
-    assert(outputDirectory);
+    ensureUnrealDirectoryExists(UnrealConfiguration.engineRootDirectory);
+    
+    ensureProjectExists(projectDir, projectName);
+    if(outputDirectory == '') {
+        failStage('No valid output directory set for the project to be output to!');
+    }
     
     if(!platform) {
         platform = UnrealConfiguration.targetPlatform;
@@ -68,8 +74,10 @@ def packageProject(String projectDir, String projectName, String outputDirectory
 /*  Data validation */
 
 def validateData(String projectDir, String projectName, Boolean turnUnstableOnFailure = false) {
+    ensureUnrealDirectoryExists(UnrealConfiguration.engineRootDirectory);
+
+    ensureProjectExists(projectDir.startsWith(env.WORKSPACE) ? projectDir : env.WORKSPACE + '/' + projectDir, projectName);
     def project = "${projectDir.startsWith(env.WORKSPACE) ? projectDir : env.WORKSPACE + '/' + projectDir}/${projectName}.uproject";
-    assert(file.exists(project));
     
     def result = bat label: 'Validate Data', returnStatus: true, script: "CALL \"${UnrealConfiguration.engineRootDirectory}/Engine/Binaries/Win64/UE4Editor-Cmd.exe\" \"${project}\" -stdout -fullstdlogoutput -buildmachine -nullrhi -unattended -run=DataValidation"
 
@@ -103,8 +111,10 @@ def runAllTests(String projectDir, String projectName, String minimumPriority = 
 }
 
 private def runUnrealAutomationTests(String projectDir, String projectName, List<String> automationCommands, String minimumPriority) {
+    ensureUnrealDirectoryExists(UnrealConfiguration.engineRootDirectory);
+    
+    ensureProjectExists(projectDir, projectName);
     def project = "${projectDir}/${projectName}.uproject";
-    assert(file.exists(project));
 
     if(minimumPriority) {
         automationCommands = [minimumTestPriorityCommand(minimumPriority)] + automationCommands;
@@ -149,5 +159,21 @@ private def minimumTestPriorityCommand(String priorityLevel) {
         return "SetMinimumPriority ${priorityLevel}";
     } else {
         return '';
+    }
+}
+
+private def ensureUnrealDirectoryExists(String unrealDirectory, Boolean calledFromInit = false) {
+    if(!file.dirExists(unrealDirectory)) {
+        failStage("Unreal Engine directory not found at specified path! (${unrealDirectory})${calledFromInit ? '' : '\nDid you set it using ue4.init?'}");
+    }
+}
+
+private def ensureProjectExists(String projectDirectory, String projectName) {
+    if(!file.dirExists(projectDirectory)) {
+        failStage("Project directory not found at specified path! (${projectDirectory})");
+    }
+
+    if(!file.exists("${projectDirectory}/${projectName}.uproject")) {
+        failStage("UProject file not found! (${projectDirectory}/${projectName}.uproject)");
     }
 }

@@ -5,8 +5,8 @@ class ItchConfiguration implements Serializable {
 }
 
 
-def init(String butlerExecutable, String apiKeyID = '', String username = '') {
-    assert(file.exists(butlerExecutable));
+def init(String butlerExecutable, String apiKeyID, String username) {
+    ensureButlerExecutableExists(butlerExecutable, true);
 
     ItchConfiguration.butlerExe = butlerExecutable;
     ItchConfiguration.apiKeyID = apiKeyID;
@@ -14,10 +14,18 @@ def init(String butlerExecutable, String apiKeyID = '', String username = '') {
 }
 
 def push(String gameDirectory, String gameName, String channel, Boolean dryRun = false, List<String> ignoredFiles = []) {
-    assert(file.exists(ItchConfiguration.butlerExe));
-    assert(file.dirExists(gameDirectory));
-    assert(gameName);
-    assert(channel);
+    ensureButlerExecutableExists(ItchConfiguration.butlerExe);
+    if(!file.dirExists(gameDirectory)) {
+        failStage("Game directory not found! (${gameDirectory})");
+    }
+
+    if(gameName == '') {
+        failStage('No game name provided!');
+    }
+
+    if(gameName == '') {
+        failStage('No channel name provided!');
+    }
 
     String ignoreStr = '';
     for(file in ignoredFiles) {
@@ -28,5 +36,11 @@ def push(String gameDirectory, String gameName, String channel, Boolean dryRun =
         bat label: 'Upload build to itch.io', script: """${ItchConfiguration.butlerExe} login
                         ${ItchConfiguration.butlerExe} push --if-changed --assume-yes ${ignoreStr} ${dryRun ? '--dry-run' : ''} "${gameDirectory}" "${ItchConfiguration.user}/${gameName}:${channel}"
                         ${ItchConfiguration.butlerExe} logout --assume-yes"""
+    }
+}
+
+private def ensureButlerExecutableExists(String butlerPath, Boolean calledFromInit = false) {
+    if(!file.exists(butlerPath)) {
+        failStage("Butler executable not found at specified path! (${butlerPath})${calledFromInit ? '' : '\nDid you set it using itch.init?'}");
     }
 }

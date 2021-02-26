@@ -4,14 +4,15 @@ class UnityConfiguration implements Serializable {
 
 
 def init(String unityDir) {
-    assert(file.dirExists(unityDir));
+    ensureUnityDirectoryExists(unityDir, true);
 
     UnityConfiguration.engineRootDirectory = unityDir;
 }
 
-def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = true, String additionalParameters = '') {
-    assert(file.dirExists(UnityConfiguration.engineRootDirectory));
-    assert(file.dirExists(projectDir) && projectDir != '');
+def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = true, String additionalParameters = '', Boolean outputLogOnFailure = true) {
+    ensureUnityDirectoryExists(UnityConfiguration.engineRootDirectory);
+    ensureProjectDirectoryExists(projectDir);
+
     projectDir = projectDir.replace('\\', '/');
 
     if(!logFile) {
@@ -26,13 +27,19 @@ def execute(String projectDir, String methodToExecute, String buildTarget = '', 
     def exitCode = bat label: 'Execute Unity Method', returnStatus: true, script: "CALL \"${UnityConfiguration.engineRootDirectory}/Editor/Unity.exe\" -batchmode -project \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -executeMethod ${methodToExecute} ${additionalParameters} -logFile \"${logFile}\" -quit"
 
     if(exitCode != 0) {
+        if(outputLogOnFailure) {
+            logContent = readFile logFile
+            log(logContent)
+        }
+
         failStage('Unity method exited with a non-zero exit code!');
     }
 }
 
 def runTests(String projectDir, String testPlatform = '', List<String> testFilters = [], List<String> testCategories = [], String testSettingsFile = '', String testResultFile = '', Boolean noGraphics = true) {
-    assert(file.dirExists(UnityConfiguration.engineRootDirectory));
-    assert(file.dirExists(projectDir) && projectDir != '');
+    ensureUnityDirectoryExists(UnityConfiguration.engineRootDirectory);
+    ensureProjectDirectoryExists(projectDir);
+
     projectDir = projectDir.replace('\\', '/');
 
     def argumentString = "-batchmode -projectPath \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -runTests -silent-crashes";
@@ -107,4 +114,16 @@ private def testPlatformIsValid(String platform) {
 
     log.error("Invalid test platform '${platform}' specified. Valid platforms: ${possiblePlatforms.join(', ')}.")
     return false;
+}
+
+private def ensureUnityDirectoryExists(String unityDirectory, Boolean calledFromInit = false) {
+    if(!file.dirExists(unityDirectory)) {
+        failStage("Unity directory not found at specified path! (${unityDirectory})${calledFromInit ? '' : '\nDid you set it using unity.init?'}");
+    }
+}
+
+private def ensureProjectDirectoryExists(String projectDirectory) {
+    if(projectDirectory == '' || !file.dirExists(projectDirectory)) {
+        failStage("Project directory does not exist! (${projectDirectory})")
+    }
 }
