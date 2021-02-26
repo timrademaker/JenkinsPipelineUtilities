@@ -9,7 +9,7 @@ def init(String unityDir) {
     UnityConfiguration.engineRootDirectory = unityDir;
 }
 
-def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = true, String additionalParameters = '') {
+def execute(String projectDir, String methodToExecute, String buildTarget = '', String logFile = '', Boolean noGraphics = true, String additionalParameters = '', Boolean outputLogOnFailure = true) {
     assert(file.dirExists(UnityConfiguration.engineRootDirectory));
     assert(file.dirExists(projectDir) && projectDir != '');
     projectDir = projectDir.replace('\\', '/');
@@ -26,6 +26,11 @@ def execute(String projectDir, String methodToExecute, String buildTarget = '', 
     def exitCode = bat label: 'Execute Unity Method', returnStatus: true, script: "CALL \"${UnityConfiguration.engineRootDirectory}/Editor/Unity.exe\" -batchmode -project \"${projectDir}\" ${noGraphics ? '-nographics' : ''} -executeMethod ${methodToExecute} ${additionalParameters} -logFile \"${logFile}\" -quit"
 
     if(exitCode != 0) {
+        if(outputLogOnFailure) {
+            logContent = readFile logFile
+            log(logContent)
+        }
+
         failStage('Unity method exited with a non-zero exit code!');
     }
 }
