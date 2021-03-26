@@ -14,6 +14,10 @@ def init(String credentials, String workspaceNameFormat, String workspaceTemplat
     P4Config.host = host;
 }
 
+def pull(deleteGeneratedFiles, quiet = true, forceClean = false) {
+   pull('', deleteGeneratedFiles, quiet, forceClean);
+}
+
 def pull(String revision = '', deleteGeneratedFiles = false, quiet = true, forceClean = false) {
     if(forceClean) {
         p4sync charset: 'none', credential: P4Config.credentials, format: P4Config.workspaceNameFormat, populate: forceClean(have: false, parallel: [enable: true, minbytes: '1024', minfiles: '1', threads: '4'], pin: revision, quiet: quiet), source: templateSource(P4Config.workspaceTemplate)
